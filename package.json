@@ -1,7 +1,7 @@
 {
   "name": "basic-loaders",
   "version": "1.0.0",
-  "description": "",
+  "description": "Basic file loaders with outputs that are easy to work with.",
   "main": "dist/basic-loaders.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

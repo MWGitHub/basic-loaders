@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <script src="../../dist/basic-loaders.js"></script>
+  </head>
+  <body>
+    <div id="main"></div>
+    <script>
+      var png = BasicLoaders.png;
+
+      png.load('bw-filled.png')
+      .then(console.log);
+    </script>
+  </body>
+</html>

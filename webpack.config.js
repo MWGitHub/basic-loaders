@@ -5,7 +5,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'basic-loaders.js',
-    library: 'BasicLoaders'
+    library: 'BasicLoaders',
+    libraryTarget: 'commonjs2'
   },
   module: {
     loaders: [{

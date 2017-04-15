@@ -24,8 +24,8 @@ const chunkSignatureType = {
  * @return {Object} the chunks with the header data and length.
  */
 function retrieveMetaChunks(byteArray) {
-  const chunks = [];
-
+  const chunks = {};
+  let lastChunk = null;
   let i = PNG_SIGNATURE.length; // skip the PNG signature
   while (i < byteArray.byteLength) {
     const dataLength = bytesToUint32(byteArray, i, META_SIZE);
@@ -53,13 +53,16 @@ function retrieveMetaChunks(byteArray) {
     };
 
     if (type) {
-      chunks.push(meta);
+      lastChunk = type;
+      if (!chunks[type]) {
+        chunks[type] = [];
+      }
+      chunks[type].push(meta);
     }
+  }
 
-    // IEND must be the last chunk
-    if (type === 'IEND') {
-      break;
-    }
+  if (lastChunk !== 'IEND') {
+    throw new Error('Last chunk must be IEND');
   }
 
   return chunks;
@@ -85,32 +88,31 @@ function isSignatureValid(byteArray) {
   return true;
 }
 
+/**
+ * Takes in a byte array for a PNG and returns the parsed data.
+ * @param  {Uint8Array} byteArray - byte array for a PNG.
+ * @return {Object} the parsed data with PNG information.
+ */
 function png(byteArray) {
   if (!isSignatureValid(byteArray)) {
     throw new Error('Invalid PNG signature');
   }
 
   const metaChunks = retrieveMetaChunks(byteArray);
-  const isLastChunkIEND = metaChunks[metaChunks.length - 1].type === 'IEND';
-
-  if (!isLastChunkIEND) {
-    throw new Error('IEND must be the last chunk');
-  }
-
-  const headerMeta = metaChunks.shift();
+  const headerMeta = metaChunks.IHDR[0];
   const header = parseHeader(byteArray, headerMeta.data.start);
   let filters = [];
   let pixels = [];
 
-  for (let i = 0; i < metaChunks.length; i++) {
-    const chunkMeta = metaChunks[i];
-    const start = chunkMeta.data.start;
-    const length = chunkMeta.data.length;
+  const keys = Object.keys(metaChunks);
+  for (let i = 0; i < keys.length; i++) {
+    const type = keys[i];
+    const chunks = metaChunks[type];
     let result;
 
-    switch (chunkMeta.type) {
+    switch (type) {
       case 'IDAT':
-        result = parseData(byteArray, start, length, header);
+        result = parseData(byteArray, chunks, header);
 
         pixels = pixels.concat(result.pixels);
         filters = filters.concat(result.filters);
@@ -137,6 +139,12 @@ function png(byteArray) {
   };
 }
 
+/**
+ * Load a PNG from a path.
+ *
+ * @param  {String} path - path to load from.
+ * @return {Object} the parsed PNG data.
+ */
 function load(path) {
   return new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();

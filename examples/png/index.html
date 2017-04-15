@@ -8,10 +8,13 @@
   <body>
     <div id="main"></div>
     <script>
-      var png = BasicLoaders.png;
+      window.addEventListener('DOMContentLoaded', () => {
+        var png = BasicLoaders.png;
 
-      png.load('bw-filled.png')
-      .then(console.log);
+        png.load('multi-dat.png')
+        .then(console.log)
+        .catch(console.error);
+      });
     </script>
   </body>
 </html>

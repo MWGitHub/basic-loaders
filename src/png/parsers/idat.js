@@ -97,10 +97,38 @@ function getPixels(unfilteredBytes, bytesPerSample, keys) {
 }
 
 /**
+ * Concatenates all data chunks.
+ *
+ * @param  {Uint8Array} byteArray - byte array to read from.
+ * @param  {Object[]} chunks - array of chunk meta.
+ * @return {Uint8Array} the data as one byte array.
+ */
+function concatChunkData(byteArray, chunks) {
+  const totalLength = chunks.reduce((acc, chunk) => acc + chunk.data.length, 0);
+  const data = new Uint8Array(totalLength);
+  let position = 0;
+
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    const start = chunk.data.start;
+    const length = chunk.data.length;
+    const chunkData = byteArray.slice(start, start + length);
+
+    data.set(chunkData, position);
+
+    position += chunk.data.length;
+  }
+
+  return data;
+}
+
+/**
  * Parse the a data chunk.
  *
  * @param  {Uint8Array} byteArray - byte array to read from.
- * @param  {Number} start - location to begin reading at.
+ * @param  {Object[]} chunks - chunks to process.
+ * @param  {Number} chunks[].data.start - start of the chunk data.
+ * @param  {Number} chunks[].data.length - length of the chunk data.
  * @param  {Number} length - length of the chunk data.
  * @param  {Object} header - PNG IHDR properties.
  * @param  {Number} header.width - width of the PNG.
@@ -108,8 +136,8 @@ function getPixels(unfilteredBytes, bytesPerSample, keys) {
  * @param  {Number} header.colorType - type of color.
  * @return {Object} the result with filters and pixels arrays.
  */
-export default function parse(byteArray, start, length, header) {
-  const compressed = byteArray.slice(start, start + length);
+export default function parse(byteArray, chunks, header) {
+  const compressed = concatChunkData(byteArray, chunks);
   const decompressed = pako.inflate(compressed);
 
   const width = header.width;

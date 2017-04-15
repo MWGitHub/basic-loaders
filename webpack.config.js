@@ -4,7 +4,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'basic-loaders.js',
+    filename: 'index.js',
     library: 'BasicLoaders'
   },
   module: {

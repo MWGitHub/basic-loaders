@@ -1,11 +1,11 @@
 {
   "name": "basic-loaders",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Basic file loaders with outputs that are easy to work with.",
-  "main": "dist/index.js",
+  "main": "dist/basic-loaders.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src --out-dir dist",
+    "build": "webpack",
     "watch": "webpack --progress --colors --watch",
     "start": "http-server -p 3000",
     "prepublish": "npm run build"
